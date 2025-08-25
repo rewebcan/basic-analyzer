@@ -1,47 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	xhtml "golang.org/x/net/html"
-	"io"
+	"github.com/rewebcan/url-fetcher-home24/crawler"
+	"github.com/rewebcan/url-fetcher-home24/fetcher"
 	"log"
-	"net/http"
-	"time"
 )
 
 var url = "https://crawler-test.com/mobile/separate_desktop_with_different_h1"
 
 func main() {
-	client := &http.Client{
-		Timeout: time.Second * 5,
-	}
-
-	response, err := client.Get(url)
+	r, err := crawler.Crawl(url, fetcher.NewFetcher())
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer response.Body.Close()
+	str, _ := json.MarshalIndent(r, "", "\t")
 
-	z := xhtml.NewTokenizer(response.Body)
-
-	for {
-		tt := z.Next()
-
-		switch tt {
-		case xhtml.ErrorToken:
-			if z.Err() == io.EOF {
-				return
-			}
-		case xhtml.DoctypeToken:
-			fmt.Println("HTML Found")
-			break
-		case xhtml.StartTagToken, xhtml.SelfClosingTagToken:
-			fmt.Printf("%s", z.Token().Data)
-			break
-		default:
-			continue
-		}
-	}
+	fmt.Println(string(str))
 }
