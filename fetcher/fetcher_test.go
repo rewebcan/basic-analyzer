@@ -14,12 +14,13 @@ func TestFetch(t *testing.T) {
 			<!DOCTYPE html>
 			<html>
 				<head>
-					<title></title>
+					<title>Test 1</title>
 				</head>
 				<body>
-					<h1>Title 1<h2>
+					<h1>Title 1</h1>
 					<form action="/" method="post">
-						
+						<input type="text" name="username" />
+						<input type="password" name="password" />
 					</form>
 					<a href="https://google.com">Page 1</a>
 					<a href="/faq">Page 2</a>
@@ -30,9 +31,9 @@ func TestFetch(t *testing.T) {
 
 	defer server.Close()
 
-	f := NewFetcher()
+	f := NewFetcher(server.Client())
 
-	result, err := f.Fetch("https://crawler-test.com/mobile/separate_desktop_with_different_h1")
+	result, err := f.Fetch(server.URL)
 
 	if err != nil {
 		t.Errorf("Fetcher returned an error: %s", err)
@@ -40,4 +41,10 @@ func TestFetch(t *testing.T) {
 
 	assert.NotNil(t, result)
 	assert.Nil(t, err)
+
+	assert.Equal(t, "Test 1", result.Title)
+	assert.Equal(t, true, result.Anchors[0].External)
+	assert.Equal(t, false, result.Anchors[1].External)
+	assert.Equal(t, []string{"Title 1"}, result.HeaderMap["h1"])
+	assert.Equal(t, true, result.HasLoginForm)
 }

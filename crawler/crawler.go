@@ -1,6 +1,11 @@
 package crawler
 
-import "github.com/rewebcan/url-fetcher-home24/fetcher"
+import (
+	"fmt"
+	"github.com/rewebcan/url-fetcher-home24/fetcher"
+	"net/url"
+	"strings"
+)
 
 type CrawlResult struct {
 	fetcher.FetchResult
@@ -9,8 +14,8 @@ type CrawlResult struct {
 
 // Crawl
 // Crawls a page with given Fetcher and Crawls again only `one more` time for the Anchors returned
-func Crawl(url string, f fetcher.Fetcher) (*CrawlResult, error) {
-	result, err := f.Fetch(url)
+func Crawl(urlRaw string, f fetcher.Fetcher) (*CrawlResult, error) {
+	result, err := f.Fetch(urlRaw)
 
 	if err != nil {
 		return nil, err
@@ -19,7 +24,15 @@ func Crawl(url string, f fetcher.Fetcher) (*CrawlResult, error) {
 	var failedURLs []fetcher.Anchor
 
 	for _, a := range result.Anchors {
-		if _, err := f.Fetch(a.URL); err != nil {
+		urlStr := a.URL
+		if false == a.External {
+			urlStr, _ = url.JoinPath(urlRaw, a.URL)
+		}
+
+		urlStr = strings.TrimRight(urlStr, "/")
+
+		if _, err := f.Fetch(urlStr); err != nil {
+			fmt.Printf("Failed to fetch URL: %s\n", urlStr)
 			failedURLs = append(failedURLs, a)
 		}
 	}
