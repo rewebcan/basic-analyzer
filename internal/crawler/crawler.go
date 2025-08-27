@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
+	"golang.org/x/sync/errgroup"
 	"net/url"
 )
 
@@ -26,17 +27,35 @@ func Crawl(urlRaw string, f fetcher.Fetcher) (*CrawlResult, error) {
 
 	var failedURLs []fetcher.Anchor
 
+	failedUrlsC := make(chan fetcher.Anchor, 16)
+	g := new(errgroup.Group)
+
 	for _, a := range result.Anchors {
-		urlStr := baseUrl.String()
+		a := a
+		g.Go(func() error {
+			urlStr := a.URL
+			if !a.External {
+				if rel, err := url.Parse(a.URL); err == nil {
+					urlStr = baseUrl.ResolveReference(rel).String()
+				} else {
+					failedUrlsC <- a
+					return nil
+				}
+			}
+			if err := f.Ping(urlStr); err != nil {
+				failedUrlsC <- a
+			}
+			return nil
+		})
+	}
 
-		if false == a.External {
-			rel, _ := url.Parse(a.URL)
-			urlStr = baseUrl.ResolveReference(rel).String()
-		}
+	go func() {
+		_ = g.Wait()
+		close(failedUrlsC)
+	}()
 
-		if err := f.Ping(urlStr); err != nil {
-			failedURLs = append(failedURLs, a)
-		}
+	for a := range failedUrlsC {
+		failedURLs = append(failedURLs, a)
 	}
 
 	return &CrawlResult{
