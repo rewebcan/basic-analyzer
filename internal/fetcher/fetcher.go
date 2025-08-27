@@ -36,6 +36,8 @@ func (f fetcher) Fetch(url string) (*FetchResult, error) {
 	r.URL = url
 	r.HeaderMap = make(map[string][]string)
 
+	anchorMap := map[string]struct{}{}
+
 	err = streamToken(resp, func(z *html.Tokenizer, tt html.TokenType, tok html.Token) error {
 		if tt == html.ErrorToken {
 			if z.Err() == io.EOF {
@@ -49,9 +51,17 @@ func (f fetcher) Fetch(url string) (*FetchResult, error) {
 
 		switch tag {
 		case "a":
-			if a, ok := extractAnchor(tok); ok {
+			a, ok := extractAnchor(tok)
+
+			if !ok {
+				break
+			}
+
+			if _, ok := anchorMap[a.URL]; !ok {
+				anchorMap[a.URL] = struct{}{}
 				r.Anchors = append(r.Anchors, a)
 			}
+
 			break
 		case "h1", "h2", "h3", "h4", "h5", "h6":
 			extractHeaders(z, tok, r.HeaderMap)

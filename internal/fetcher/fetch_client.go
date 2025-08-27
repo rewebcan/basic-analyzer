@@ -78,7 +78,7 @@ func extractAnchor(tok html.Token) (Anchor, bool) {
 		return Anchor{}, false
 	}
 
-	if attr.Val == "#" || attr.Val == "javascript::" {
+	if attr.Val == "#" || attr.Val == "javascript::" || attr.Val == "/" {
 		return Anchor{}, false
 	}
 

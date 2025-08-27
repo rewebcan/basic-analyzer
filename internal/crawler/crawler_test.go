@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"github.com/rewebcan/url-fetcher-home24/fetcher"
+	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
