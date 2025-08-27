@@ -34,7 +34,7 @@ func Crawl(urlRaw string, f fetcher.Fetcher) (*CrawlResult, error) {
 			urlStr = baseUrl.ResolveReference(rel).String()
 		}
 
-		if _, err := f.Fetch(urlStr); err != nil {
+		if err := f.Ping(urlStr); err != nil {
 			failedURLs = append(failedURLs, a)
 		}
 	}

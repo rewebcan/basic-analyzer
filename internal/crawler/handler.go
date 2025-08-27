@@ -19,12 +19,14 @@ func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
 func CrawlHandler(w http.ResponseWriter, r *http.Request) {
 	var crawlResult *CrawlResult
 
-	t := template.Must(template.ParseFiles("views/index.html"))
+	t := template.Must(
+		template.New("index.html").
+			Funcs(funcMap).
+			ParseFiles("views/index.html"),
+	)
 
 	if r.Method == "POST" {
 		cr := NewCrawlRequestFromRequest(r)
-
-		fmt.Printf("Request received: %s\n", cr)
 
 		if err := cr.Validate(); err != nil {
 			_ = t.Execute(w, CrawlPageResponse{
@@ -68,4 +70,16 @@ func (cr *CrawlRequest) Validate() error {
 	}
 
 	return nil
+}
+
+var funcMap = template.FuncMap{
+	"containsUrl": func(anchors []fetcher.Anchor, str string) bool {
+		for _, a := range anchors {
+			if a.URL == str {
+				return true
+			}
+		}
+
+		return false
+	},
 }

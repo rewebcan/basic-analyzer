@@ -7,14 +7,27 @@ import (
 	"net/http"
 )
 
-var PageNotFound = errors.New("page not found")
-
 type Fetcher interface {
 	Fetch(url string) (*FetchResult, error)
+	Ping(url string) error
 }
 
 type fetcher struct {
 	httpClient *http.Client
+}
+
+func (f fetcher) Ping(url string) error {
+	resp, err := f.httpClient.Get(url)
+
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return errors.New("unexpected status code: " + resp.Status)
+	}
+
+	return nil
 }
 
 func NewFetcher(httpClient *http.Client) Fetcher {

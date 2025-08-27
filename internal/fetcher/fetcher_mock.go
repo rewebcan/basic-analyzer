@@ -1,13 +1,20 @@
 package fetcher
 
+import "errors"
+
 type fakeFetcher map[string]*FetchResult
+
+func (f fakeFetcher) Ping(url string) (err error) {
+	_, err = f.Fetch(url)
+	return
+}
 
 func (f fakeFetcher) Fetch(url string) (*FetchResult, error) {
 	if res, ok := f[url]; ok {
 		return res, nil
 	}
 
-	return nil, PageNotFound
+	return nil, errors.New("not found")
 }
 
 func NewFakeFetcher() Fetcher {

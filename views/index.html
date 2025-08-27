@@ -32,7 +32,7 @@
     <form method="POST" action="/analyze">
         <label for="url">
             URL:
-            <input type="text" name="url" id="url" placeholder="https://example.com"/>
+            <input type="text" name="url" id="url" placeholder="https://example.com" value="{{ if .CrawlResult }}{{ .CrawlResult.URL }}{{ end }}"/>
         </label>
         <input type="submit">
     </form>
@@ -43,7 +43,7 @@
                 <p>URL: {{ .URL }}</p>
                 <p>Title: {{ .Title }}</p>
                 {{range $key, $vals := .HeaderMap}}
-                    <p>{{ $key }} -
+                    <p>{{ $key }} ({{ len $vals }} items)  -
                     {{range $i, $v := $vals}}
                         {{if $i}}, {{end}}{{$v}}
                     {{end}}
@@ -52,13 +52,16 @@
                     <p>No headers.</p>
                 {{end}}
 
-                {{range .CrawlResult.Anchors}}
-                    <p>
-                        <a href="{{.URL}}" target="_blank">{{.URL}}</a> {{if .External}}(external){{end}}
-                    </p>
+                {{ if .Anchors }}
+                    <p>Links from the URL:</p>
+                    {{range .Anchors}}
+                        <p class="{{ if containsUrl $.CrawlResult.FailedURLs .URL }}error{{end}}">
+                            <a href="{{.URL}}" target="_blank">{{.URL}}</a> {{if .External}}(external){{end}}
+                        </p>
+                    {{ end }}
                 {{else}}
                     <p>No anchors found</p>
-                {{end}}
+                {{ end }}
             {{ end }}
         {{ end }}
     </div>

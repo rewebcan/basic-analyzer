@@ -3,7 +3,6 @@ package fetcher
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"golang.org/x/net/html"
 	"io"
 	"net/http"
@@ -81,8 +80,6 @@ func extractAnchor(tok html.Token) (Anchor, bool) {
 	if attr.Val == "#" || attr.Val == "javascript::" || attr.Val == "/" {
 		return Anchor{}, false
 	}
-
-	fmt.Println(attr)
 
 	urlStr := attr.Val
 	isUrlInternal := strings.HasPrefix(urlStr, "http://") || strings.HasPrefix(urlStr, "https://")
