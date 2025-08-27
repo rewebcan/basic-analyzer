@@ -3,9 +3,11 @@ package crawler
 import (
 	"errors"
 	"fmt"
-	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
 	"html/template"
 	"net/http"
+
+	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
+	"github.com/rewebcan/url-fetcher-home24/internal/util"
 )
 
 var ValidationErr = errors.New("validation error")
@@ -67,6 +69,16 @@ type CrawlRequest struct {
 func (cr *CrawlRequest) Validate() error {
 	if cr.URL == "" {
 		return fmt.Errorf("%w: url string can not be empty", ValidationErr)
+	}
+
+	normalizedURL, err := util.NormalizeURL(cr.URL)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ValidationErr, err.Error())
+	}
+	cr.URL = normalizedURL
+
+	if err := util.IsValidHTTPURL(cr.URL); err != nil {
+		return fmt.Errorf("%w: %s", ValidationErr, err.Error())
 	}
 
 	return nil
