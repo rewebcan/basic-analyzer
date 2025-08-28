@@ -61,7 +61,7 @@ func streamToken(reader io.Reader, handler func(z *html.Tokenizer, tokenType htm
 		}
 
 		switch tt {
-		case html.StartTagToken, html.SelfClosingTagToken:
+		case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken:
 			if err := handler(z, tt, zn); err != nil {
 				return err
 			}
@@ -87,6 +87,22 @@ func extractAnchor(tok html.Token) (Anchor, bool) {
 		URL:      urlStr,
 		External: isUrlInternal,
 	}, true
+}
+
+func extractHTMLVersion(token html.Token) string {
+	doctype := strings.ToLower(token.Data)
+
+	if strings.Contains(doctype, "html") {
+		if strings.Contains(doctype, "4.01") {
+			return "HTML 4.01"
+		} else if strings.Contains(doctype, "xhtml") {
+			return "XHTML"
+		} else {
+			return "HTML5" // <!DOCTYPE html>
+		}
+	}
+
+	return "Unknown"
 }
 
 func extractHeaders(z *html.Tokenizer, tok html.Token, hm map[string][]string) {

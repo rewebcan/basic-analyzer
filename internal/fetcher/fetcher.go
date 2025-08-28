@@ -77,6 +77,10 @@ func (f fetcher) Fetch(ctx context.Context, url string) (*FetchResult, error) {
 
 		tag := tok.Data
 
+		if tt == html.DoctypeToken {
+			r.HTMLVersion = extractHTMLVersion(tok)
+		}
+
 		switch tag {
 		case "a":
 			a, ok := extractAnchor(tok)
@@ -134,4 +138,5 @@ type FetchResult struct {
 	HeaderMap    map[string][]string
 	Anchors      []Anchor
 	HasLoginForm bool
+	HTMLVersion  string
 }

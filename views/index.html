@@ -55,6 +55,7 @@
                 {{ with .CrawlResult }}
                     <h1>Result: </h1>
                     <p>URL: {{ .URL }}</p>
+                    <p>HTML Version: {{ .HTMLVersion }}</p>
                     <p>Title: {{ .Title }}</p>
                     <p>Login Form: {{ if .HasLoginForm }} Yes {{ else }} No {{ end }}</p>
                     {{range $key, $vals := .HeaderMap}}
