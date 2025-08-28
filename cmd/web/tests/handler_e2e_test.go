@@ -50,6 +50,10 @@ func TestCrawlHandler_E2E(t *testing.T) {
 				if !strings.Contains(body, "<p>Title: Test Page</p>") {
 					t.Errorf("Expected page title to be extracted and displayed, got: %s", body)
 				}
+				// Check that login form indicator is displayed (should be "No" since test page has no password fields)
+				if !strings.Contains(body, "<p>Login Form:  No </p>") {
+					t.Errorf("Expected login form indicator to show 'No' for page without login form, got: %s", body)
+				}
 			},
 		},
 		{
@@ -230,6 +234,7 @@ func TestCrawlHandler_FormSubmission(t *testing.T) {
 		"Test Page",            // Title from crawled page
 		"https://external.com", // External link
 		"/internal-link",       // Internal link
+		"Login Form:  No ",     // Login form indicator (should be "No" since test page has no password fields)
 	}
 
 	for _, content := range expectedContent {
