@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -24,6 +25,8 @@ func main() {
 	crawlCtrl := crawler.NewCrawlController(f, c)
 
 	app.HandleFunc("/analyze", crawlCtrl.CrawlHandler)
+
+	fmt.Println("Server is up and running...")
 
 	if err := http.ListenAndServe(":8080", loggingMiddleware(app)); err != nil {
 		log.Fatal(err)
