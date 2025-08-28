@@ -3,6 +3,7 @@ package fetcher
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -10,7 +11,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-var ErrBadStatus = errors.New("bad status")
+var ErrBadStatus = errors.New("bad status code")
 
 type limitedBody struct {
 	io.Reader
@@ -29,14 +30,14 @@ func fetch(httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.Read
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not reach to server")
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 8<<10))
 		_ = resp.Body.Close()
 
-		return nil, ErrBadStatus
+		return nil, fmt.Errorf("server respond bad status code %v: %w", resp.StatusCode, ErrBadStatus)
 	}
 
 	return limitedBody{
