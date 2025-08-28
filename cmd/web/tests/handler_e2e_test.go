@@ -56,6 +56,10 @@ func TestCrawlHandler_E2E(t *testing.T) {
 				if !strings.Contains(body, "<p>Login Form:  No </p>") {
 					t.Errorf("Expected login form indicator to show 'No' for page without login form, got: %s", body)
 				}
+				// Check that HTML version is correctly detected and displayed
+				if !strings.Contains(body, "<p>HTML Version: HTML5</p>") {
+					t.Errorf("Expected HTML version to be detected as HTML5, got: %s", body)
+				}
 			},
 		},
 		{

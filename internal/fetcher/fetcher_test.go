@@ -56,4 +56,5 @@ func TestFetch(t *testing.T) {
 	assert.Equal(t, false, result.Anchors[1].External)
 	assert.Equal(t, []string{"Title 1"}, result.HeaderMap["h1"])
 	assert.Equal(t, true, result.HasLoginForm)
+	assert.Equal(t, "HTML5", result.HTMLVersion)
 }
