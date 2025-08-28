@@ -33,8 +33,8 @@ func fetch(httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.Read
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		io.Copy(io.Discard, io.LimitReader(resp.Body, 8<<10))
-		resp.Body.Close()
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 8<<10))
+		_ = resp.Body.Close()
 
 		return nil, ErrBadStatus
 	}
@@ -63,8 +63,6 @@ func streamToken(reader io.Reader, handler func(z *html.Tokenizer, tokenType htm
 			if err := handler(z, tt, zn); err != nil {
 				return err
 			}
-
-			break
 		}
 	}
 }

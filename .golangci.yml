@@ -1,0 +1,43 @@
+run:
+  timeout: 3m
+  tests: true
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - errcheck
+    - gocyclo
+    - gosec
+    - misspell
+    - revive
+  disable:
+    - depguard
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  revive:
+    severity: warning
+    rules:
+      - name: exported
+        disabled: true
+  gosec:
+    excludes:
+      - G114
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - gocyclo
+    - linters:
+        - errcheck
+      text: "Close()"
+

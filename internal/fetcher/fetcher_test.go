@@ -27,7 +27,7 @@ func TestFetch(t *testing.T) {
 					<a href="/faq">Page 2</a>
 				</body>
 			</html>`
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 
 	defer server.Close()

@@ -76,19 +76,14 @@ func (f fetcher) Fetch(url string) (*FetchResult, error) {
 				anchorMap[a.URL] = struct{}{}
 				r.Anchors = append(r.Anchors, a)
 			}
-
-			break
 		case "h1", "h2", "h3", "h4", "h5", "h6":
 			extractHeaders(z, tok, r.HeaderMap)
-			break
 		case "title":
 			r.Title, _ = readTextValue(z)
-			break
 		case "input":
 			if attr, ok := findAttr(tok, "type"); ok && attr.Val == "password" {
 				r.HasLoginForm = true
 			}
-			break
 		}
 
 		return nil
