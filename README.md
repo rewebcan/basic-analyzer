@@ -98,6 +98,46 @@ go run cmd/web/
 # The application will be available at http://localhost:8080/analyze
 ```
 
+### Building the Application
+
+#### Build for Current Platform
+```bash
+# Build binary for your current platform
+make build
+
+# The binary will be created at ./build/url-fetcher
+```
+
+#### Cross-Platform Builds
+```bash
+# Build for Linux (amd64)
+make build-linux
+
+# Build for macOS (amd64)
+make build-darwin
+
+# Build for Windows (amd64)
+make build-windows
+
+# Build for all platforms at once
+make build-all
+```
+
+#### Running the Built Binary
+```bash
+# After building, run the binary directly
+./build/url-fetcher
+
+# Or with custom configuration
+CRAWLER_TIMEOUT=30s ./build/url-fetcher
+```
+
+#### Clean Build Artifacts
+```bash
+# Remove all build artifacts and binaries
+make clean
+```
+
 ### Configuration
 The application supports configuration via environment variables:
 
@@ -165,6 +205,12 @@ make test          # Run unit tests
 make e2e-test      # Run end-to-end tests
 make lint          # Run linters
 make lint-fix      # Auto-fix linting issues
+make build         # Build for current platform
+make build-linux   # Build for Linux (amd64)
+make build-darwin  # Build for macOS (amd64)
+make build-windows # Build for Windows (amd64)
+make build-all     # Build for all platforms
+make clean         # Clean build artifacts
 ```
 
 ## Possible Improvements
