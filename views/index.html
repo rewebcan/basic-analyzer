@@ -7,6 +7,7 @@
         * {
             padding: 0;
             margin: 0;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
         }
         .error {
             background-color: rgb(255, 0, 0, 0.4);
@@ -20,51 +21,75 @@
             margin-top: 10px;
             display: block;
         }
+        .container {
+            width: 1140px;
+        }
+        .content {
+            padding: 16px;
+        }
+        fieldset {
+            padding: 24px;
+            background-color: beige;
+        }
     </style>
 </head>
 <body>
-    <h1>Home24 Basic Crawler</h1>
+    <div class="container grid">
+        <h1>Home24 Basic Crawler</h1>
 
-    {{ range .Errors }}
-        <div class="error">{{ . }}</div>
-    {{ end }}
+        {{ range .Errors }}
+            <div class="error">{{ . }}</div>
+        {{ end }}
 
-    <form method="POST" action="/analyze">
-        <label for="url">
-            URL:
-            <input type="text" name="url" id="url" placeholder="https://example.com" value="{{ if .CrawlResult }}{{ .CrawlResult.URL }}{{ end }}"/>
-        </label>
-        <input type="submit">
-    </form>
-    <div>
-        {{ if .CrawlResult }}
-            {{ with .CrawlResult }}
-                <h1>Result: </h1>
-                <p>URL: {{ .URL }}</p>
-                <p>Title: {{ .Title }}</p>
-                <p>Login Form: {{ if .HasLoginForm }} Yes {{ else }} No {{ end }}</p>
-                {{range $key, $vals := .HeaderMap}}
-                    <p>{{ $key }} ({{ len $vals }} items)  -
-                    {{range $i, $v := $vals}}
-                        {{if $i}}, {{end}}{{$v}}
-                    {{end}}
-                    </p>
-                {{ else }}
-                    <p>No headers.</p>
-                {{end}}
-
-                {{ if .Anchors }}
-                    <p>Links from the URL:</p>
-                    {{range .Anchors}}
-                        <p class="{{ if containsUrl $.CrawlResult.FailedURLs .URL }}error{{end}}">
-                            <a href="{{.URL}}" target="_blank">{{.URL}}</a> {{if .External}}(external){{end}}
+        <form method="POST" action="/analyze">
+        <fieldset>
+            <label for="url">
+                URL:
+                <input type="text" name="url" id="url" placeholder="https://example.com" value="{{ if .CrawlResult }}{{ .CrawlResult.URL }}{{ end }}"/>
+            </label>
+            <input type="submit">
+        </fieldset>
+        </form>
+        <div class="content">
+            {{ if .CrawlResult }}
+                {{ with .CrawlResult }}
+                    <h1>Result: </h1>
+                    <p>URL: {{ .URL }}</p>
+                    <p>Title: {{ .Title }}</p>
+                    <p>Login Form: {{ if .HasLoginForm }} Yes {{ else }} No {{ end }}</p>
+                    {{range $key, $vals := .HeaderMap}}
+                        <p>{{ $key }} ({{ len $vals }} items)  -
+                        {{range $i, $v := $vals}}
+                            {{if $i}}, {{end}}{{$v}}
+                        {{end}}
                         </p>
+                    {{ else }}
+                        <p>No headers.</p>
+                    {{end}}
+
+                    {{ if .Anchors }}
+                        <p>Links from the URL:</p>
+                        {{range .Anchors}}
+                            <p class="{{ if containsUrl $.CrawlResult.FailedURLs .URL }}error{{end}}">
+                                <a href="{{.URL}}" target="_blank">{{.URL}}</a> {{if .External}}(external){{end}}
+                            </p>
+                        {{ end }}
+                    {{else}}
+                        <p>No anchors found</p>
                     {{ end }}
-                {{else}}
-                    <p>No anchors found</p>
                 {{ end }}
             {{ end }}
-        {{ end }}
+        </div>
     </div>
+    <script>
+        document.querySelector('form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            const content = document.querySelector('.content');
+            content.innerHTML = "<p>Loading...</p>"
+            
+            this.submit();
+        })
+    </script>
 </body>
 </html>
