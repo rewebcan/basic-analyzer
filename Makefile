@@ -6,14 +6,13 @@ APP_DIR ?= ./cmd/web
 PKG ?= ./...
 TIMEOUT ?= 60s
 
-.PHONY: help run test integration-test itest lint lint-fix lint-setup
+.PHONY: help run test e2e-test lint lint-fix lint-setup
 
 help:
 	@echo "Usage:"
 	@echo "  make run                # Run the application"
 	@echo "  make test               # Run unit tests"
-	@echo "  make integration-test   # Run integration tests (requires -tags=integration)"
-	@echo "  make itest              # Alias for integration-test"
+	@echo "  make e2e-test           # Run end-to-end tests"
 	@echo "  make lint               # Run golangci-lint"
 	@echo "  make lint-fix           # Run linters with fixes where supported"
 	@echo "  make lint-setup         # Install golangci-lint locally"
@@ -24,8 +23,8 @@ run:
 test:
 	$(GO) test $(PKG) -count=1 -race -timeout $(TIMEOUT) -coverprofile=coverage.out
 
-integration-test itest:
-	$(GO) test -tags=integration $(PKG) -count=1 -race -timeout $(TIMEOUT)
+e2e-test:
+	$(GO) test ./cmd/web/tests/ -count=1 -race -timeout $(TIMEOUT) -v
 
 lint:
 	@command -v $(GOLANGCI_LINT) >/dev/null 2>&1 || { echo "golangci-lint not found. Run 'make lint-setup' first."; exit 1; }

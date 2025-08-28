@@ -19,12 +19,17 @@ func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
 }
 
 type crawlController struct {
-	f fetcher.Fetcher
-	c Crawler
+	f            fetcher.Fetcher
+	c            Crawler
+	templatePath string
 }
 
 func NewCrawlController(f fetcher.Fetcher, c Crawler) *crawlController {
-	return &crawlController{f, c}
+	return &crawlController{f: f, c: c, templatePath: "views/index.html"}
+}
+
+func NewCrawlControllerWithTemplate(f fetcher.Fetcher, c Crawler, templatePath string) *crawlController {
+	return &crawlController{f: f, c: c, templatePath: templatePath}
 }
 
 func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +38,7 @@ func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request
 	t := template.Must(
 		template.New("index.html").
 			Funcs(funcMap).
-			ParseFiles("views/index.html"),
+			ParseFiles(ctrl.templatePath),
 	)
 
 	if r.Method == "POST" {
