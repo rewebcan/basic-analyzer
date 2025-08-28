@@ -42,6 +42,7 @@
                 <h1>Result: </h1>
                 <p>URL: {{ .URL }}</p>
                 <p>Title: {{ .Title }}</p>
+                <p>Login Form: {{ if .HasLoginForm }} Yes {{ else }} No {{ end }}</p>
                 {{range $key, $vals := .HeaderMap}}
                     <p>{{ $key }} ({{ len $vals }} items)  -
                     {{range $i, $v := $vals}}
