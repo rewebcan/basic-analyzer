@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-var BadStatusErr = errors.New("bad status")
+var ErrBadStatus = errors.New("bad status")
 
 type limitedBody struct {
 	io.Reader
@@ -36,7 +36,7 @@ func fetch(httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.Read
 		io.Copy(io.Discard, io.LimitReader(resp.Body, 8<<10))
 		resp.Body.Close()
 
-		return nil, BadStatusErr
+		return nil, ErrBadStatus
 	}
 
 	return limitedBody{

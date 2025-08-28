@@ -12,7 +12,7 @@ import (
 
 var config = util.LoadCrawlerConfigFromEnv()
 
-var ValidationErr = errors.New("validation error")
+var ErrValidation = errors.New("validation error")
 
 func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
 	cr := &CrawlRequest{URL: r.FormValue("url")}
@@ -74,17 +74,17 @@ type CrawlRequest struct {
 
 func (cr *CrawlRequest) Validate() error {
 	if cr.URL == "" {
-		return fmt.Errorf("%w: url string can not be empty", ValidationErr)
+		return fmt.Errorf("%w: url string can not be empty", ErrValidation)
 	}
 
 	normalizedURL, err := util.NormalizeURL(cr.URL)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ValidationErr, err.Error())
+		return fmt.Errorf("%w: %s", ErrValidation, err.Error())
 	}
 	cr.URL = normalizedURL
 
 	if err := util.IsValidHTTPURL(cr.URL); err != nil {
-		return fmt.Errorf("%w: %s", ValidationErr, err.Error())
+		return fmt.Errorf("%w: %s", ErrValidation, err.Error())
 	}
 
 	return nil
