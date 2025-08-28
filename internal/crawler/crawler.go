@@ -9,11 +9,6 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-type CrawlResult struct {
-	fetcher.FetchResult
-	FailedURLs []fetcher.Anchor
-}
-
 // CrawlOption is a function that configures crawl behavior
 type CrawlOption func(*crawlConfig)
 
@@ -29,9 +24,18 @@ func WithConcurrencyLimit(limit int) CrawlOption {
 	}
 }
 
-// Crawl
-// Crawls a page with given fetcher and URL, applying crawl options using Commander pattern
-func Crawl(f fetcher.Fetcher, urlRaw string, opts ...CrawlOption) (*CrawlResult, error) {
+type Crawler interface {
+	Crawl(string) (*CrawlResult, error)
+}
+
+type crawler struct {
+	f           fetcher.Fetcher
+	crawlConfig *crawlConfig
+}
+
+// NewCrawler creates a new Crawler using the provided fetcher and optional
+// configuration options.
+func NewCrawler(f fetcher.Fetcher, opts ...CrawlOption) Crawler {
 	// Default configuration
 	config := &crawlConfig{
 		concurrencyLimit: 10,
@@ -42,15 +46,26 @@ func Crawl(f fetcher.Fetcher, urlRaw string, opts ...CrawlOption) (*CrawlResult,
 		opt(config)
 	}
 
+	return &crawler{f, config}
+}
+
+type CrawlResult struct {
+	fetcher.FetchResult
+	FailedURLs []fetcher.Anchor
+}
+
+// Crawl
+// Crawls a page with given URL
+func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
 	ctx := context.Background()
-	sem := semaphore.NewWeighted(int64(config.concurrencyLimit))
+	sem := semaphore.NewWeighted(int64(c.crawlConfig.concurrencyLimit))
 
 	baseUrl, err := url.Parse(urlRaw)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := f.Fetch(urlRaw)
+	result, err := c.f.Fetch(urlRaw)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +91,7 @@ func Crawl(f fetcher.Fetcher, urlRaw string, opts ...CrawlOption) (*CrawlResult,
 					return nil
 				}
 			}
-			if err := f.Ping(urlStr); err != nil {
+			if err := c.f.Ping(urlStr); err != nil {
 				failedUrlsC <- a
 			}
 			return nil

@@ -10,8 +10,6 @@ import (
 	"github.com/rewebcan/url-fetcher-home24/internal/util"
 )
 
-var config = util.LoadCrawlerConfigFromEnv()
-
 var ErrValidation = errors.New("validation error")
 
 func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
@@ -20,7 +18,16 @@ func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
 	return cr
 }
 
-func CrawlHandler(w http.ResponseWriter, r *http.Request) {
+type crawlController struct {
+	f fetcher.Fetcher
+	c Crawler
+}
+
+func NewCrawlController(f fetcher.Fetcher, c Crawler) *crawlController {
+	return &crawlController{f, c}
+}
+
+func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request) {
 	var crawlResult *CrawlResult
 
 	t := template.Must(
@@ -42,11 +49,7 @@ func CrawlHandler(w http.ResponseWriter, r *http.Request) {
 
 		var err error
 
-		crawlResult, err = Crawl(
-			fetcher.NewFetcher(&http.Client{Timeout: config.CrawlerTimeout}, config.BodySizeLimit),
-			cr.URL,
-			WithConcurrencyLimit(config.ConcurrencyLimit),
-		)
+		crawlResult, err = ctrl.c.Crawl(cr.URL)
 
 		if err != nil {
 			_ = t.Execute(w, CrawlPageResponse{

@@ -8,7 +8,8 @@ import (
 )
 
 func TestCrawler(t *testing.T) {
-	r, err := Crawl(fetcher.NewFakeFetcher(), "https://crawler-test.com/mobile/separate_desktop_with_different_h1")
+	c := NewCrawler(fetcher.NewFakeFetcher())
+	r, err := c.Crawl("https://crawler-test.com/mobile/separate_desktop_with_different_h1")
 
 	assert.NotNil(t, r)
 	assert.Nil(t, err)
@@ -18,7 +19,8 @@ func TestCrawler(t *testing.T) {
 }
 
 func TestCrawler_Fail(t *testing.T) {
-	r, err := Crawl(fetcher.NewFakeFetcher(), "https://google.com")
+	c := NewCrawler(fetcher.NewFakeFetcher())
+	r, err := c.Crawl("https://google.com")
 
 	assert.Nil(t, r)
 	assert.NotNil(t, err)
