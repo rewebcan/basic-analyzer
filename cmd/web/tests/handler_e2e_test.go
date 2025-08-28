@@ -145,11 +145,11 @@ func setupFakeWebsite() *httptest.Server {
     <a href="/broken-link">Broken Link</a>
 </body>
 </html>`
-			w.Write([]byte(html))
+			_, _ = w.Write([]byte(html))
 		case "/internal-link":
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("<html><body><h1>Internal Page</h1></body></html>"))
+			_, _ = w.Write([]byte("<html><body><h1>Internal Page</h1></body></html>"))
 		case "/broken-link":
 			w.WriteHeader(http.StatusNotFound)
 		default:
