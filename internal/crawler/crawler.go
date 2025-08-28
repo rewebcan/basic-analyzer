@@ -26,7 +26,7 @@ func WithConcurrencyLimit(limit int) CrawlOption {
 }
 
 type Crawler interface {
-	Crawl(string) (*CrawlResult, error)
+	Crawl(ctx context.Context, url string) (*CrawlResult, error)
 }
 
 type crawler struct {
@@ -58,10 +58,9 @@ type CrawlResult struct {
 
 // Crawl
 // Crawls a page with given URL
-func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
+func (c *crawler) Crawl(ctx context.Context, urlRaw string) (*CrawlResult, error) {
 	c.logger.Info("Starting crawl", "url", urlRaw, "concurrency_limit", c.crawlConfig.concurrencyLimit)
 
-	ctx := context.Background()
 	sem := semaphore.NewWeighted(int64(c.crawlConfig.concurrencyLimit))
 
 	baseUrl, err := url.Parse(urlRaw)
@@ -71,7 +70,7 @@ func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
 	}
 
 	c.logger.Info("Fetching main page", "url", urlRaw)
-	result, err := c.f.Fetch(urlRaw)
+	result, err := c.f.Fetch(ctx, urlRaw)
 	if err != nil {
 		c.logger.Error("Failed to fetch main page", "url", urlRaw, "error", err.Error())
 		return nil, err
@@ -101,7 +100,7 @@ func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
 					return nil
 				}
 			}
-			if err := c.f.Ping(urlStr); err != nil {
+			if err := c.f.Ping(ctx, urlStr); err != nil {
 				failedUrlsC <- a
 			}
 			return nil

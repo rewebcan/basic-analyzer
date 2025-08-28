@@ -1,11 +1,13 @@
 package crawler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
 	"github.com/rewebcan/url-fetcher-home24/internal/util"
@@ -61,7 +63,11 @@ func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request
 
 		var err error
 
-		crawlResult, err = ctrl.c.Crawl(cr.URL)
+		// Create context with timeout to prevent long-running operations
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		crawlResult, err = ctrl.c.Crawl(ctx, cr.URL)
 
 		if err != nil {
 			ctrl.logger.Error("Crawl failed", "error", err.Error(), "url", cr.URL)

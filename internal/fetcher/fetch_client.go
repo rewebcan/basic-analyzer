@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -22,8 +23,8 @@ func (l limitedBody) Close() error {
 	return l.closer.Close()
 }
 
-func fetch(httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.ReadCloser, error) {
-	req, err := http.NewRequest(http.MethodGet, rawUrl, nil)
+func fetch(ctx context.Context, httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.ReadCloser, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawUrl, nil)
 	if err != nil {
 		return nil, err
 	}

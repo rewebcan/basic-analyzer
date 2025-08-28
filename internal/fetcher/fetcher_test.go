@@ -1,11 +1,13 @@
 package fetcher
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +39,10 @@ func TestFetch(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	f := NewFetcher(server.Client(), logger, 10<<20)
 
-	result, err := f.Fetch(server.URL)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := f.Fetch(ctx, server.URL)
 
 	if err != nil {
 		t.Errorf("Fetcher returned an error: %s", err)

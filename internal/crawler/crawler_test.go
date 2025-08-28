@@ -1,9 +1,11 @@
 package crawler
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"testing"
+	"time"
 
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
 	"github.com/stretchr/testify/assert"
@@ -12,7 +14,11 @@ import (
 func TestCrawler(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	c := NewCrawler(fetcher.NewFakeFetcher(), logger)
-	r, err := c.Crawl("https://crawler-test.com/mobile/separate_desktop_with_different_h1")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	r, err := c.Crawl(ctx, "https://crawler-test.com/mobile/separate_desktop_with_different_h1")
 
 	assert.NotNil(t, r)
 	assert.Nil(t, err)
@@ -24,7 +30,11 @@ func TestCrawler(t *testing.T) {
 func TestCrawler_Fail(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	c := NewCrawler(fetcher.NewFakeFetcher(), logger)
-	r, err := c.Crawl("https://google.com")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	r, err := c.Crawl(ctx, "https://google.com")
 
 	assert.Nil(t, r)
 	assert.NotNil(t, err)

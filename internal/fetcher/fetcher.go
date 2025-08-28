@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"context"
 	"errors"
 	"io"
 	"log/slog"
@@ -10,8 +11,8 @@ import (
 )
 
 type Fetcher interface {
-	Fetch(url string) (*FetchResult, error)
-	Ping(url string) error
+	Fetch(ctx context.Context, url string) (*FetchResult, error)
+	Ping(ctx context.Context, url string) error
 }
 
 type fetcher struct {
@@ -20,12 +21,17 @@ type fetcher struct {
 	logger        *slog.Logger
 }
 
-func (f fetcher) Ping(url string) error {
-	resp, err := f.httpClient.Get(url)
-
+func (f fetcher) Ping(ctx context.Context, url string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
 	}
+
+	resp, err := f.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return errors.New("unexpected status code: " + resp.Status)
@@ -41,10 +47,10 @@ func NewFetcher(httpClient *http.Client, logger *slog.Logger, bodySizeLimit int6
 // Fetch
 // Fetches the given url and returns a structured response
 // if error returned it might be the reason the given url is not reachable
-func (f fetcher) Fetch(url string) (*FetchResult, error) {
+func (f fetcher) Fetch(ctx context.Context, url string) (*FetchResult, error) {
 	f.logger.Info("Starting fetch", "url", url)
 
-	resp, err := fetch(f.httpClient, url, f.bodySizeLimit)
+	resp, err := fetch(ctx, f.httpClient, url, f.bodySizeLimit)
 	if err != nil {
 		f.logger.Error("Failed to fetch URL", "url", url, "error", err.Error())
 		return nil, err
