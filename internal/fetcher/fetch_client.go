@@ -3,10 +3,11 @@ package fetcher
 import (
 	"bytes"
 	"errors"
-	"golang.org/x/net/html"
 	"io"
 	"net/http"
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
 var BadStatusErr = errors.New("bad status")
@@ -20,7 +21,7 @@ func (l limitedBody) Close() error {
 	return l.closer.Close()
 }
 
-func fetch(httpClient *http.Client, rawUrl string) (io.ReadCloser, error) {
+func fetch(httpClient *http.Client, rawUrl string, bodySizeLimit int64) (io.ReadCloser, error) {
 	req, err := http.NewRequest(http.MethodGet, rawUrl, nil)
 	if err != nil {
 		return nil, err
@@ -38,10 +39,8 @@ func fetch(httpClient *http.Client, rawUrl string) (io.ReadCloser, error) {
 		return nil, BadStatusErr
 	}
 
-	mn := int64(10 << 20)
-
 	return limitedBody{
-		Reader: io.LimitReader(resp.Body, mn),
+		Reader: io.LimitReader(resp.Body, bodySizeLimit),
 		closer: resp.Body,
 	}, nil
 }

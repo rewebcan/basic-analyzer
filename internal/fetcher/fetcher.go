@@ -2,9 +2,10 @@ package fetcher
 
 import (
 	"errors"
-	"golang.org/x/net/html"
 	"io"
 	"net/http"
+
+	"golang.org/x/net/html"
 )
 
 type Fetcher interface {
@@ -13,7 +14,8 @@ type Fetcher interface {
 }
 
 type fetcher struct {
-	httpClient *http.Client
+	httpClient    *http.Client
+	bodySizeLimit int64
 }
 
 func (f fetcher) Ping(url string) error {
@@ -30,15 +32,15 @@ func (f fetcher) Ping(url string) error {
 	return nil
 }
 
-func NewFetcher(httpClient *http.Client) Fetcher {
-	return fetcher{httpClient}
+func NewFetcher(httpClient *http.Client, bodySizeLimit int64) Fetcher {
+	return fetcher{httpClient: httpClient, bodySizeLimit: bodySizeLimit}
 }
 
 // Fetch
 // Fetches the given url and returns a structured response
 // if error returned it might be the reason the given url is not reachable
 func (f fetcher) Fetch(url string) (*FetchResult, error) {
-	resp, err := fetch(f.httpClient, url)
+	resp, err := fetch(f.httpClient, url, f.bodySizeLimit)
 	if err != nil {
 		return nil, err
 	}

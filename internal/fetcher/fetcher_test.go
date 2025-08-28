@@ -1,10 +1,11 @@
 package fetcher
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFetch(t *testing.T) {
@@ -31,7 +32,7 @@ func TestFetch(t *testing.T) {
 
 	defer server.Close()
 
-	f := NewFetcher(server.Client())
+	f := NewFetcher(server.Client(), 10<<20)
 
 	result, err := f.Fetch(server.URL)
 

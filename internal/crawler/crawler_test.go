@@ -1,13 +1,14 @@
 package crawler
 
 import (
+	"testing"
+
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestCrawler(t *testing.T) {
-	r, err := Crawl("https://crawler-test.com/mobile/separate_desktop_with_different_h1", fetcher.NewFakeFetcher())
+	r, err := Crawl(fetcher.NewFakeFetcher(), "https://crawler-test.com/mobile/separate_desktop_with_different_h1")
 
 	assert.NotNil(t, r)
 	assert.Nil(t, err)
@@ -17,7 +18,7 @@ func TestCrawler(t *testing.T) {
 }
 
 func TestCrawler_Fail(t *testing.T) {
-	r, err := Crawl("https://google.com", fetcher.NewFakeFetcher())
+	r, err := Crawl(fetcher.NewFakeFetcher(), "https://google.com")
 
 	assert.Nil(t, r)
 	assert.NotNil(t, err)
