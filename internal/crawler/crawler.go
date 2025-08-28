@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"context"
+	"log/slog"
 	"net/url"
 
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
@@ -31,11 +32,12 @@ type Crawler interface {
 type crawler struct {
 	f           fetcher.Fetcher
 	crawlConfig *crawlConfig
+	logger      *slog.Logger
 }
 
 // NewCrawler creates a new Crawler using the provided fetcher and optional
 // configuration options.
-func NewCrawler(f fetcher.Fetcher, opts ...CrawlOption) Crawler {
+func NewCrawler(f fetcher.Fetcher, logger *slog.Logger, opts ...CrawlOption) Crawler {
 	// Default configuration
 	config := &crawlConfig{
 		concurrencyLimit: 10,
@@ -46,7 +48,7 @@ func NewCrawler(f fetcher.Fetcher, opts ...CrawlOption) Crawler {
 		opt(config)
 	}
 
-	return &crawler{f, config}
+	return &crawler{f: f, crawlConfig: config, logger: logger}
 }
 
 type CrawlResult struct {
@@ -57,18 +59,26 @@ type CrawlResult struct {
 // Crawl
 // Crawls a page with given URL
 func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
+	c.logger.Info("Starting crawl", "url", urlRaw, "concurrency_limit", c.crawlConfig.concurrencyLimit)
+
 	ctx := context.Background()
 	sem := semaphore.NewWeighted(int64(c.crawlConfig.concurrencyLimit))
 
 	baseUrl, err := url.Parse(urlRaw)
 	if err != nil {
+		c.logger.Error("Failed to parse URL", "url", urlRaw, "error", err.Error())
 		return nil, err
 	}
 
+	c.logger.Info("Fetching main page", "url", urlRaw)
 	result, err := c.f.Fetch(urlRaw)
 	if err != nil {
+		c.logger.Error("Failed to fetch main page", "url", urlRaw, "error", err.Error())
 		return nil, err
 	}
+
+	c.logger.Info("Main page fetched successfully", "url", urlRaw, "anchors_found", len(result.Anchors))
+
 	var failedURLs []fetcher.Anchor
 
 	failedUrlsC := make(chan fetcher.Anchor, 16)
@@ -106,6 +116,8 @@ func (c *crawler) Crawl(urlRaw string) (*CrawlResult, error) {
 	for a := range failedUrlsC {
 		failedURLs = append(failedURLs, a)
 	}
+
+	c.logger.Info("Crawl completed", "url", urlRaw, "total_anchors", len(result.Anchors), "failed_urls", len(failedURLs))
 
 	return &CrawlResult{
 		FetchResult: *result,

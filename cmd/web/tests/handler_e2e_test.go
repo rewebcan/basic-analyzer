@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -169,14 +171,17 @@ func setupWebApp() http.Handler {
 	// Create HTTP client
 	hc := &http.Client{Timeout: config.CrawlerTimeout}
 
+	// Create logger
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
 	// Create fetcher
-	f := fetcher.NewFetcher(hc, config.BodySizeLimit)
+	f := fetcher.NewFetcher(hc, logger, config.BodySizeLimit)
 
 	// Create crawler
-	c := crawler.NewCrawler(f, crawler.WithConcurrencyLimit(10))
+	c := crawler.NewCrawler(f, logger, crawler.WithConcurrencyLimit(10))
 
 	// Create crawl controller with custom template path
-	crawlCtrl := crawler.NewCrawlControllerWithTemplate(f, c, templatePath)
+	crawlCtrl := crawler.NewCrawlControllerWithTemplate(f, c, logger, templatePath)
 
 	// Create router
 	app := http.NewServeMux()

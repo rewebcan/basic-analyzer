@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 
 	"github.com/rewebcan/url-fetcher-home24/internal/fetcher"
@@ -21,19 +22,22 @@ func NewCrawlRequestFromRequest(r *http.Request) *CrawlRequest {
 type crawlController struct {
 	f            fetcher.Fetcher
 	c            Crawler
+	logger       *slog.Logger
 	templatePath string
 }
 
-func NewCrawlController(f fetcher.Fetcher, c Crawler) *crawlController {
-	return &crawlController{f: f, c: c, templatePath: "views/index.html"}
+func NewCrawlController(f fetcher.Fetcher, c Crawler, l *slog.Logger) *crawlController {
+	return &crawlController{f: f, c: c, logger: l, templatePath: "views/index.html"}
 }
 
-func NewCrawlControllerWithTemplate(f fetcher.Fetcher, c Crawler, templatePath string) *crawlController {
-	return &crawlController{f: f, c: c, templatePath: templatePath}
+func NewCrawlControllerWithTemplate(f fetcher.Fetcher, c Crawler, l *slog.Logger, templatePath string) *crawlController {
+	return &crawlController{f: f, c: c, logger: l, templatePath: templatePath}
 }
 
 func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request) {
 	var crawlResult *CrawlResult
+
+	ctrl.logger.Info("CrawlHandler started", "method", r.Method, "url", r.URL.Path)
 
 	t := template.Must(
 		template.New("index.html").
@@ -45,24 +49,30 @@ func (ctrl *crawlController) CrawlHandler(w http.ResponseWriter, r *http.Request
 		cr := NewCrawlRequestFromRequest(r)
 
 		if err := cr.Validate(); err != nil {
+			ctrl.logger.Warn("Crawl request validation failed", "error", err.Error(), "url", cr.URL)
 			_ = t.Execute(w, CrawlPageResponse{
 				CrawlResult: nil,
 				Errors:      []string{err.Error()},
 			})
 			return
 		}
+
+		ctrl.logger.Info("Starting crawl", "url", cr.URL)
 
 		var err error
 
 		crawlResult, err = ctrl.c.Crawl(cr.URL)
 
 		if err != nil {
+			ctrl.logger.Error("Crawl failed", "error", err.Error(), "url", cr.URL)
 			_ = t.Execute(w, CrawlPageResponse{
 				CrawlResult: nil,
 				Errors:      []string{err.Error()},
 			})
 			return
 		}
+
+		ctrl.logger.Info("Crawl completed successfully", "url", cr.URL, "anchors_found", len(crawlResult.Anchors), "failed_urls", len(crawlResult.FailedURLs))
 	}
 
 	_ = t.Execute(w, CrawlPageResponse{

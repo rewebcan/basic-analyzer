@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/rewebcan/url-fetcher-home24/internal/crawler"
@@ -19,10 +21,12 @@ func main() {
 	app := http.NewServeMux()
 
 	hc := &http.Client{Timeout: config.CrawlerTimeout}
-	f := fetcher.NewFetcher(hc, config.BodySizeLimit)
-	c := crawler.NewCrawler(f, crawler.WithConcurrencyLimit(10))
+	jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
+	l := slog.New(jsonHandler)
+	f := fetcher.NewFetcher(hc, l, config.BodySizeLimit)
+	c := crawler.NewCrawler(f, l, crawler.WithConcurrencyLimit(10))
 
-	crawlCtrl := crawler.NewCrawlController(f, c)
+	crawlCtrl := crawler.NewCrawlController(f, c, l)
 
 	app.HandleFunc("/analyze", crawlCtrl.CrawlHandler)
 

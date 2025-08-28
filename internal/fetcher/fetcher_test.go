@@ -1,6 +1,8 @@
 package fetcher
 
 import (
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,7 +34,8 @@ func TestFetch(t *testing.T) {
 
 	defer server.Close()
 
-	f := NewFetcher(server.Client(), 10<<20)
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	f := NewFetcher(server.Client(), logger, 10<<20)
 
 	result, err := f.Fetch(server.URL)
 
