@@ -104,7 +104,7 @@ func TestCrawlHandler_E2E(t *testing.T) {
 			}
 
 			// Create POST request
-			req := httptest.NewRequest(http.MethodPost, "/analyze", strings.NewReader(formData.Encode()))
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(formData.Encode()))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			// Create response recorder
@@ -189,7 +189,7 @@ func setupWebApp() http.Handler {
 
 	// Create router
 	app := http.NewServeMux()
-	app.HandleFunc("/analyze", crawlCtrl.CrawlHandler)
+	app.HandleFunc("/", crawlCtrl.CrawlHandler)
 
 	return app
 }
@@ -198,7 +198,7 @@ func setupWebApp() http.Handler {
 func TestCrawlHandler_GetRequest(t *testing.T) {
 	app := setupWebApp()
 
-	req := httptest.NewRequest(http.MethodGet, "/analyze", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
 	app.ServeHTTP(w, req)
@@ -226,7 +226,7 @@ func TestCrawlHandler_FormSubmission(t *testing.T) {
 	formData.Set("url", fakeServer.URL+"/test-page")
 
 	// Create POST request
-	req := httptest.NewRequest(http.MethodPost, "/analyze", strings.NewReader(formData.Encode()))
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(formData.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	w := httptest.NewRecorder()

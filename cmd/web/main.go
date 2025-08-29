@@ -27,9 +27,9 @@ func main() {
 
 	crawlCtrl := crawler.NewCrawlController(f, c, l)
 
-	app.HandleFunc("/analyze", crawlCtrl.CrawlHandler)
+	app.HandleFunc("/", crawlCtrl.CrawlHandler)
 
-	fmt.Println("Server is up and running...")
+	fmt.Printf("Server is up and running at localhost:8080...\n")
 
 	chain := util.Chain(
 		util.RecoveryMiddleware(),

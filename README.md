@@ -95,7 +95,7 @@ make run
 # or
 go run cmd/web/
 
-# The application will be available at http://localhost:8080/analyze
+# The application will be available at http://localhost:8080/
 ```
 
 ### Building the Application
@@ -154,7 +154,7 @@ export CRAWLER_CONCURRENCY_LIMIT=20
 
 ## 📖 Usage
 
-1. **Access the Application**: Open http://localhost:8080/analyze in your web browser
+1. **Access the Application**: Open http://localhost:8080/ in your web browser
 2. **Enter URL**: Type a valid HTTP/HTTPS URL in the input field
 3. **Submit**: Click the submit button to analyze the page
 4. **View Results**: Review the comprehensive analysis results
