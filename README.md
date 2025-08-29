@@ -216,6 +216,7 @@ make clean         # Clean build artifacts
 ## Possible Improvements
 - **Robots.txt Compliance**: Check and respect robots.txt files before crawling to follow website rules
 - **Rate Limiting**: Implement intelligent rate limiting to avoid overwhelming target servers
+- **Caching**: Implement response caching to avoid re-analyzing recently processed URLs and improve performance
 - **User-Agent Identification**: Proper user-agent strings identifying the crawler
 - **Crawl Delay Respect**: Honor crawl-delay directives from robots.txt
 - **Smart Concurrency**: Adaptive concurrency based on server response times to prevent DDoS-like behavior
